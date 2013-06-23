@@ -46,7 +46,7 @@ class DMCA_API_ClientTest extends PHPUnit_Framework_TestCase {
     $response = $this->api->register( array(
       'first_name'    => 'DMCA API',
       'last_name'     => 'Tester',
-      'company_name'  => 'Tester',
+      'company_name'  => 'NewClarity LLC',
       'email'         => $email,
     ));
     if ( $response->is_error() ) {

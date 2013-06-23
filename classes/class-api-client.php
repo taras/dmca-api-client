@@ -3,8 +3,6 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
   /**
    * Class DMCA_API_Client
    *
-   * @method array|object ()
-   *
    * @author Mike Schinkel <mike@newclarity.net>
    * @license GPLv2
    *
@@ -40,7 +38,7 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
 //      $this->register_var( 'Email', 		  'usage=json|type=string' );
 //      $this->register_var( 'Password',    'usage=json|type=string' );
 
-    $this->register_resource( 'anonymous_badges', 		      'path=/GetAnonymousBadges|auth=false|request_settings=' );
+    $this->register_resource( 'anonymous_badges',           'path=/GetAnonymousBadges|auth=false|request_settings=' );
     $this->register_resource( 'authenticated_badges',       'path=/GetAuthenticatedBadges' );
     $this->register_resource( 'watermarker_tokens',         'path=/GetWaterMarkerTokens' );
     $this->register_resource( 'watermarker_token',          'path=/GetWaterMarkerToken' );
@@ -52,8 +50,8 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
       'request_settings'=> 'post_json'
     ));
 
-    $this->register_action( 'authenticate', 			  		    'path=/GetAuthenticatedBadges|!has_body' );
-    $this->register_action( 'register', 				 	  	      'path=/RegisterNewAccount|auth=false' );
+    $this->register_action( 'authenticate',                 'path=/GetAuthenticatedBadges|!has_body' );
+    $this->register_action( 'register',                     'path=/RegisterNewAccount|auth=false' );
     $this->register_action( 'create_watermarker_token',     'path=/CreateWaterMarkerToken' );
     $this->register_action( 'update_watermarker_token',     'path=/UpdateWaterMarkerToken' );
     $this->register_action( 'delete_watermarker_token',     'path=/DeleteWaterMarkerToken' );
@@ -106,10 +104,17 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
         break;
     }
   }
+
+  /**
+   * Returns a list of badges as an array.
+   *
+   * @return bool|array
+   */
   function get_anonymous_badges() {
     $result = parent::get_anonymous_badges();
     return $result && isset( $result['a'] ) && is_array( $result['a'] ) ? $result['a'] : false;
   }
+
   function get_authenticated_badges() {
     return false;
   }
