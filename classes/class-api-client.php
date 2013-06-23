@@ -16,8 +16,8 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
        */
     function initialize() {
 
-  //    $this->add_filter( 'filter_result_body' );
-  //    $this->add_action( 'prepare_request' );
+      $this->add_filter( 'result_body' );
+      $this->add_action( 'prepare_request' );
 
       $this->api_name = 'DMCA.com API';
       $this->base_url = 'https://www.dmca.com/rest';
@@ -84,21 +84,22 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
       return $response;
     }
 
-    function filter_result_body( $body, $response ) {
+    protected function _result_body( $body, $response ) {
       $body = str_replace( array( '&#xD;', '&#xA;', '&lt;', '&gt;' ), array( '', '', '<', '>' ), $body );
       return $body;
     }
 
     /**
      * @param RESTian_Request $request
+     *
+     * This should not be needed once we update RESTian to have the ability to "pass" vars in the request body.
      */
-    function prepare_request( $request ) {
+    protected function _prepare_request( $request ) {
       switch ( $request->service->service_name ) {
         case 'authenticate':
-          $request->add_header( 'Content-type', 'application/json; charset=utf-8' );
           $credentials = $request->get_credentials();
           $request->body = json_encode( array(
-            'Email'     => $credentials['email'],
+            'Email'     => $this->sanitize_email( $credentials['email'] ),
             'Password'  => $credentials['password'],
           ));
           break;
