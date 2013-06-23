@@ -107,13 +107,21 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
     }
 
     /**
-     * Returns a list of badges as an array.
+     * Returns a list of badge URLs as an array.
      *
      * @return bool|array
      */
     function get_anonymous_badges() {
-      $result = parent::get_anonymous_badges();
-      return $result && isset( $result['a'] ) && is_array( $result['a'] ) ? $result['a'] : false;
+      $badges = false;
+      $data = parent::get_anonymous_badges();
+      if ( $data && isset( $data['a'] ) && is_array( $data['a'] ) ) {
+        $badges = array();
+        foreach( $data['a'] as $badge ) {
+          if ( isset( $badge->img->{'@attributes'}['src'] ) )
+            $badges[] = $badge->img->{'@attributes'}['src'];
+        }
+      }
+      return $badges;
     }
 
     function get_authenticated_badges() {
