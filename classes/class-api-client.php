@@ -62,15 +62,16 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
     }
 
     function register( $args ) {
+      $email = $this->sanitize_email( $args['email'] );
       /**
        * @var RESTian_Http_Agent_Base $http_agent
        */
-      if ( ! $this->validate_email( $args['email'] ) ) {
+      if ( ! $this->validate_email( $email ) ) {
         $response = new RESTian_Response( array(
           'authenticated' => false,
         ));
         $response->set_http_error( '400', 'Bad Request' );
-        $response->set_error( '100', "Email not valid: {$args['email']}" );
+        $response->set_error( 'EMAIL_INVALID', "The value entered [{$email}] not a valid email address." );
       } else {
         $fields = explode( '|', 'first_name|last_name|company_name|email' );
         $args = array_merge( array_fill_keys( $fields, false ), $args );
@@ -78,13 +79,15 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
           'FirstName'   => $this->sanitize_string( $args['first_name'] ),
           'LastName'    => $this->sanitize_string( $args['last_name'] ),
           'CompanyName' => $this->sanitize_string( $args['company_name'] ),
-          'Email'       => $this->sanitize_email( $args['email'] ),
+          'Email'       => $email,
         ));
+        if ( preg_match('#>ERROR: Account already exists<#', $response->body ) )
+          $response->set_error( 'CREDENTIALS_EXIST', "An account already exists for email {$email}." );
       }
       return $response;
     }
 
-    protected function _result_body( $body, $response ) {
+    function _result_body( $body, $response ) {
       $body = str_replace( array( '&#xD;', '&#xA;', '&lt;', '&gt;' ), array( '', '', '<', '>' ), $body );
       return $body;
     }
@@ -94,7 +97,7 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
      *
      * This should not be needed once we update RESTian to have the ability to "pass" vars in the request body.
      */
-    protected function _prepare_request( $request ) {
+    function _prepare_request( $request ) {
       switch ( $request->service->service_name ) {
         case 'authenticate':
           $credentials = $request->get_credentials();
@@ -111,7 +114,7 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
      *
      * @return bool|array
      */
-    function get_anonymous_badges() {
+    function get_anonymous_badge_urls() {
       $badges = false;
       $data = parent::get_anonymous_badges();
       if ( $data && isset( $data['a'] ) && is_array( $data['a'] ) ) {
@@ -124,7 +127,7 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
       return $badges;
     }
 
-    function get_authenticated_badges() {
+    function get_authenticated_badges_urls() {
       return false;
     }
     function register_new_account() {
