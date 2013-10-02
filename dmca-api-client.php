@@ -14,7 +14,7 @@
  */
 
 if ( ! class_exists( 'RESTian_Client' ) ) {
-  echo 'ERROR: DMCA API Client requires RESTian v0.4+.';
+	echo 'ERROR: DMCA API Client requires RESTian v0.4+. See https://github.com/newclarity/restian.';
   die();
 }
 
