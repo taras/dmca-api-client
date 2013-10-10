@@ -32,14 +32,10 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
         'not_vars'        => array(),
       ));
 
-  //      $this->register_var( 'FirstName',   'usage=json|type=string' );
-  //      $this->register_var( 'LastName',    'usage=json|type=string' );
-  //      $this->register_var( 'CompanyName', 'usage=json|type=string' );
-  //      $this->register_var( 'Email', 		  'usage=json|type=string' );
-  //      $this->register_var( 'Password',    'usage=json|type=string' );
+      $this->register_var( 'AccountID',   'type=string' );
 
       $this->register_resource( 'anonymous_badges',           'path=/GetAnonymousBadges|auth=false|request_settings=' );
-      $this->register_resource( 'authenticated_badges',       'path=/GetAuthenticatedBadges' );
+      $this->register_resource( 'registered_badges',          'path=/GetRegisteredBadges|AccountID=' );
       $this->register_resource( 'watermarker_tokens',         'path=/GetWaterMarkerTokens' );
       $this->register_resource( 'watermarker_token',          'path=/GetWaterMarkerToken' );
       $this->register_resource( 'watermarker_pro_token',      'path=/GetWaterMarkerProToken' );
@@ -109,27 +105,38 @@ if ( ! class_exists( 'DMCA_API_Client' ) ) {
       }
     }
 
+    function get_registered_badges_urls( $args = array() ) {
+      $badges = false;
+      $data = parent::get_registered_badges( $args );
+      return $this->_get_badge_urls( $data );
+    }
+
     /**
      * Returns a list of badge URLs as an array.
      *
      * @return bool|array
      */
-    function get_anonymous_badge_urls() {
+    function get_anonymous_badges_urls() {
       $badges = false;
       $data = parent::get_anonymous_badges();
+      return $this->_get_badge_urls( $data );
+    }
+
+    function _get_badge_urls( $data ) {
+      $badges = false;
       if ( $data && isset( $data['a'] ) && is_array( $data['a'] ) ) {
         $badges = array();
         foreach( $data['a'] as $badge ) {
-          if ( isset( $badge->img->{'@attributes'}['src'] ) )
-            $badges[] = $badge->img->{'@attributes'}['src'];
+          if ( isset( $badge->img->{'@attributes'}['src'] ) ) {
+            $url = $badge->img->{'@attributes'}['src'];
+            $query = parse_url( $url, PHP_URL_QUERY );
+            $badges[] = str_replace( "?$query", "", $url );
+          }
         }
       }
       return $badges;
     }
 
-    function get_authenticated_badges_urls() {
-      return false;
-    }
     function register_new_account() {
       return false;
     }
