@@ -9,19 +9,32 @@ class DMCA_Auth_Provider extends RESTian_Auth_Provider_Base {
    */
   function authenticated( $response ) {
 
-    $xml = new SimpleXMLElement( $response->body );
-
     $account_id = 0;
+    $xml = null;
+    $error = null;
 
-    if ( isset( $xml->a ) ) {
-      $a = $xml->a[0];
-      $attrs = $a->attributes();
-      $href = (string) $attrs->href;
-      $params = array();
-      $query = parse_url( $href, PHP_URL_QUERY );
-      parse_str( $query, $params );
-      if ( isset( $params[ 'ID' ] ) ) {
-        $account_id = $params[ 'ID' ];
+    if ( 500 === $response->status_code ) {
+      $error = json_decode($response->body);
+      $response->set_error('500', $error->Message);
+    } else {
+      try {
+        $xml = new SimpleXMLElement( $response->body );
+      } catch (Exception $e) {
+        $response->set_error('parsing', $e->getMessage());
+      }
+
+      if ( !$response->has_error() ) {
+        if ( isset( $xml->a ) ) {
+          $a = $xml->a[0];
+          $attrs = $a->attributes();
+          $href = (string) $attrs->href;
+          $params = array();
+          $query = parse_url( $href, PHP_URL_QUERY );
+          parse_str( $query, $params );
+          if ( isset( $params[ 'ID' ] ) ) {
+            $account_id = $params[ 'ID' ];
+          }
+        }
       }
     }
 
